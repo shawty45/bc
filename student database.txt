@@ -1,0 +1,71 @@
+#!/bin/bash
+
+DB_FILE="students.txt"
+
+function add_student() {
+  read -p "Enter Roll No: " roll
+  read -p "Enter Name: " name
+  read -p "Enter Marks: " marks
+  echo "$roll $name $marks" >> $DB_FILE
+  echo "Student added successfully."
+}
+
+function display_students() {
+  echo -e "\nRoll No\tName\tMarks"
+  echo "--------------------------"
+  awk '{ printf "%s\t%s\t%s\n", $1, $2, $3 }' $DB_FILE
+}
+
+function search_student() {
+  read -p "Enter Roll No to search: " roll
+  grep "^$roll " $DB_FILE && return
+  echo "No student found with Roll No $roll"
+}
+
+function update_student() {
+  read -p "Enter Roll No to update: " roll
+  grep "^$roll " $DB_FILE > /dev/null
+  if [ $? -eq 0 ]; then
+    read -p "Enter new name: " name
+    read -p "Enter new marks: " marks
+    grep -v "^$roll " $DB_FILE > temp.txt
+    echo "$roll $name $marks" >> temp.txt
+    mv temp.txt $DB_FILE
+    echo "Student record updated."
+  else
+    echo "Student with Roll No $roll not found."
+  fi
+}
+
+function delete_student() {
+  read -p "Enter Roll No to delete: " roll
+  grep "^$roll " $DB_FILE > /dev/null
+  if [ $? -eq 0 ]; then
+    grep -v "^$roll " $DB_FILE > temp.txt
+    mv temp.txt $DB_FILE
+    echo "Student record deleted."
+  else
+    echo "Student with Roll No $roll not found."
+  fi
+}
+
+while true; do
+  echo -e "\n--- Student Database Menu ---"
+  echo "1. Add Student"
+  echo "2. Display All Students"
+  echo "3. Search by Roll Number"
+  echo "4. Update by Roll Number"
+  echo "5. Delete by Roll Number"
+  echo "6. Exit"
+  read -p "Enter your choice: " choice
+
+  case $choice in
+    1) add_student ;;
+    2) display_students ;;
+    3) search_student ;;
+    4) update_student ;;
+    5) delete_student ;;
+    6) echo "Exiting..."; break ;;
+    *) echo "Invalid choice. Try again." ;;
+  esac
+done
